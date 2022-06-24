@@ -274,8 +274,6 @@ class DataPrepper:
                     feature_results[log_entry['name']].append(0.0)
 
         frame = pd.DataFrame(feature_results)
-
-        print(frame)
         return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
         # IMPLEMENT_END
 
