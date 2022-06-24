@@ -202,7 +202,7 @@ class DataPrepper:
             if isinstance(doc_ids, np.ndarray):
                 doc_ids = doc_ids.tolist()
             click_prior_query = qu.create_prior_queries_from_group(group)
-            ltr_feats_df = self.__log_ltr_query_features(group[:1]["query_id"], key, doc_ids, click_prior_query, no_results,
+            ltr_feats_df = self.__log_ltr_query_features(group.iloc[0]["query_id"], key, doc_ids, click_prior_query, no_results,
                                                          terms_field=terms_field)
             if ltr_feats_df is not None:
                 feature_frames.append(ltr_feats_df)
