@@ -12,6 +12,30 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "categoryPath_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "categoryPath": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "subclass_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "subclass": "{{keywords}}"
+          }
+        }
       }
     ]
   }

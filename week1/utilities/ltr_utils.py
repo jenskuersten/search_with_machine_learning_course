@@ -23,7 +23,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     },
                     "model": ltr_model_name,
                     "store": ltr_store_name,
-                    "active_features": ["name_match"]
+                    "active_features": ["name_match", "categoryPath_match", "subclass_match"]
                 }
             },
             "query_weight" : main_query_weight,
@@ -78,46 +78,34 @@ def create_sltr_hand_tuned_query(user_query, query_obj, click_prior_query, ltr_m
 def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name, ltr_store_name, size=200, terms_field="_id"):
     ##### Step 3.b:
     log_query = {
-        "script": {
-            "lang": "mustache",
-            "source": {
-                "size": 1,
-                "query": {
-                    "bool": {
-                        "filter": [
-                            {
-                                "terms": {
-                                    "sku": [
-                                        doc_ids
-                                    ]
-                                }
-                            },
-                            {
-                                "sltr": {
-                                    "_name": "logged_featureset",
-                                    "featureset": featureset_name,
-                                    "store": ltr_store_name,
-                                    "params": {
-                                        "keywords": query,
-                                    }
-                                }
+        "query": {
+            "bool": {
+                "filter": [
+                    {
+                        "terms": {
+                            "_id": doc_ids
+                        }
+                    },
+                    {
+                        "sltr": {
+                            "_name": "logged_featureset",
+                            "featureset": featureset_name,
+                            "store": ltr_store_name,
+                            "params": {
+                                "keywords": query,
                             }
-                        ]
-                    }
-                },
-                "ext": {
-                    "ltr_log": {
-                        "log_specs": {
-                            "name": "log_entry",
-                            "named_query": "logged_featureset"
                         }
                     }
-                }
+                ]
             }
         },
-        "params": {
-            "user_query": "",
-            "sku": ""
+        "ext": {
+            "ltr_log": {
+                "log_specs": {
+                    "name": "log_entry",
+                            "named_query": "logged_featureset"
+                }
+            }
         }
     }
     return log_query
