@@ -96,7 +96,7 @@ def create_feature_log_query(query, doc_ids, click_prior_query, featureset_name,
                                 "sltr": {
                                     "_name": "logged_featureset",
                                     "featureset": featureset_name,
-                                    "store": "week1",
+                                    "store": ltr_store_name,
                                     "params": {
                                         "keywords": query,
                                     }
