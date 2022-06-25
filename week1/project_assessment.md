@@ -26,7 +26,7 @@
     - We don't know the ranking that produced the impressions, we are using our search engine setup as a proxy (to collect the non-relevant docs)
     - We are using a simple step function with for buckets
     - Clicks alone could be easily created by bot traffic
-    - So we would probably want to collect more precise data along with hit sets from the original search engine. We would want to make sure query distribution (e.g. frequency) matches our actual customer behavior...
+    - So we would probably want to collect more precise data along with hit sets from the original search engine. We would want to make sure query distribution (e.g. frequency) matches our actual customer behavior. Beyond that we would probably want to incorporate data from further down in the channel - for the e-commerce use case (add-to-carts, purchases, returns, ...)
 1. What is target leakage and why is it a bad thing?
     - Exposing the target value for training via the features, which would typically create great assessment results, but the model would in fact be garbage and not suitable for production.
 1. When can using prior history cause problems in search and LTR?
