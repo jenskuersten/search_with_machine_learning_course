@@ -1,0 +1,60 @@
+{"size": 500, "sort": [
+        {"_score": {"order": "desc"
+            }
+        }
+    ], "query": {"function_score": {"query": {"bool": {"must": [], "should": [
+                        {"match": {"name": {"query": "iPhone 4s", "fuzziness": "1", "prefix_length": 2, "boost": 0.01
+                                }
+                            }
+                        },
+                        {"match_phrase": {"name.hyphens": {"query": "iPhone 4s", "slop": 1, "boost": 50
+                                }
+                            }
+                        },
+                        {"multi_match": {"query": "iPhone 4s", "type": "phrase", "slop": "6", "minimum_should_match": "2<75%", "fields": ["name^10", "name.hyphens^10", "shortDescription^5", "longDescription^5", "department^0.5", "sku", "manufacturer", "features", "categoryPath"
+                                ]
+                            }
+                        },
+                        {"terms": {"sku": ["iPhone", "4s"
+                                ], "boost": 50.0
+                            }
+                        },
+                        {"match": {"name.hyphens": {"query": "iPhone 4s", "operator": "OR", "minimum_should_match": "2<75%"
+                                }
+                            }
+                        }
+                    ], "minimum_should_match": 1
+                }
+            }, "boost_mode": "multiply", "score_mode": "sum", "functions": [
+                {"filter": {"exists": {"field": "salesRankShortTerm"
+                        }
+                    }, "gauss": {"salesRankShortTerm": {"origin": "1.0", "scale": "100"
+                        }
+                    }
+                },
+                {"filter": {"exists": {"field": "salesRankMediumTerm"
+                        }
+                    }, "gauss": {"salesRankMediumTerm": {"origin": "1.0", "scale": "1000"
+                        }
+                    }
+                },
+                {"filter": {"exists": {"field": "salesRankLongTerm"
+                        }
+                    }, "gauss": {"salesRankLongTerm": {"origin": "1.0", "scale": "1000"
+                        }
+                    }
+                },
+                {"script_score": {"script": "0.0001"
+                    }
+                }
+            ]
+        }
+    }, "_source": ["sku", "name"
+    ], "rescore": {"window_size": 500, "query": {"rescore_query": {"sltr": {"params": {"keywords": "iPhone 4s"
+                    }, "model": "ltr_model", "store": "week1", "active_features": ["name_match", "name_phrase", "name_hyphens", "artistName_phrase", "shortDescription_phrase", "longDescription_phrase", "categoryPath_match", "customerReviewAverage", "customerReviewCount", "salesRankShortTerm"
+                    ]
+                }
+            }, "query_weight": 0.0, "rescore_query_weight": 2.0
+        }
+    }
+}

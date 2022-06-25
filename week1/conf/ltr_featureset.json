@@ -14,6 +14,23 @@
         }
       },
       {
+        "name": "name_avg_raw_tp",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_explorer": {
+            "type": "avg_raw_tp",
+            "query": {
+                "match": {
+                    "name": "{{keywords}}"
+                }
+            }
+          }
+        }
+      },
+      {
         "name": "name_phrase",
         "params": [
           "keywords"
@@ -66,7 +83,7 @@
         "template_language": "mustache",
         "template": {
           "match_phrase": {
-            "shortDescription": {
+            "longDescription": {
               "query": "{{keywords}}",
               "slop": 6
             }
@@ -86,26 +103,6 @@
               "slop": 6
             }
           }
-        }
-      },
-      {
-        "name": "customerReviewAverage",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [{
-                "field_value_factor": {
-                    "field": "customerReviewAverage",
-                    "missing": 0
-                }
-            }],
-            "query": {
-                "match_all": {}
-            }
-        }
         }
       },
       {
@@ -129,19 +126,7 @@
         }
       },
       {
-        "name": "categoryPath_match",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match": {
-            "categoryPath": "{{keywords}}"
-          }
-        }
-      },
-      {
-        "name": "salesRankShortTerm",
+        "name": "salesRankLongTerm",
         "template_language": "mustache",
         "template": {
           "function_score": {
@@ -149,11 +134,11 @@
               {
                 "filter": {
                   "exists": {
-                    "field": "salesRankShortTerm"
+                    "field": "salesRankLongTerm"
                   }
                 },
                 "gauss": {
-                  "salesRankShortTerm": {
+                  "salesRankLongTerm": {
                     "origin": "1.0",
                     "offset": "100",
                     "scale": "10000",
@@ -166,18 +151,70 @@
                   "bool": {
                     "must_not": {
                       "exists": {
-                        "field": "salesRankShortTerm"
+                        "field": "salesRankLongTerm"
                       }
                     }
                   }
                 },
                 "script_score": {
-                  "script": "if (doc['salesRankShortTerm'] == null || doc['salesRankShortTerm'].size() == 0  ){return 0.0}"
+                  "script": "if (doc['salesRankLongTerm'] == null || doc['salesRankLongTerm'].size() == 0  ){return 0.0}"
                 }
               }
             ],
             "query": {
               "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "script_recency",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "releaseDate"
+                  }
+                },
+                "exp": {
+                  "releaseDate" : {
+                      "origin": "2013-01-01",
+                      "offset": "5d",
+                      "scale" : "60d"
+                  }
+                }
+              },
+              {
+                "filter": {
+                  "bool": {
+                    "must_not": {
+                      "exists": {
+                        "field": "releaseDate"
+                      }
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "if (doc['releaseDate'] == null || doc['releaseDate'].size() == 0  ){return 0.0}"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "script_available",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "script_score": {
+              "script": "if (doc['onlineAvailability'][0] == false){return 0.0} else {return 1.0}"
             }
           }
         }

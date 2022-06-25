@@ -24,17 +24,16 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     "model": ltr_model_name,
                     "store": ltr_store_name,
                     "active_features": 
-                        ["name_match",
-                         "name_phrase",
-                         "name_hyphens",
-                         "artistName_phrase",
-                         "shortDescription_phrase",
-                         "longDescription_phrase",
-                         "categoryPath_match",
-                         "customerReviewAverage",
-                         "customerReviewCount",
-                         "salesRankShortTerm"
-                         ]
+                        [   "name_match",
+                            "name_avg_raw_tp",
+                            "name_phrase",
+                            "name_hyphens",
+                            "artistName_phrase",
+                            "longDescription_phrase",
+                            "customerReviewCount",
+                            "salesRankLongTerm",
+                            "script_available"
+                        ]
                 }
             },
             "query_weight" : main_query_weight,
