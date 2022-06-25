@@ -32,3 +32,19 @@
 1. When can using prior history cause problems in search and LTR?
     - As soon as the customer behavior changes (e.g. seasonal effects like X-Mas/summer/winter in e-commerce). Also the way this is implemented matters, because it is easy to mess up if your using priors from catalog items. This works for stable catalogs, but could be useless for volatile collections.
 1. Submit your project along with your best MRR scores
+# Level 3 - LTR vs. baseline comparison
+[Baseline](https://github.com/jenskuersten/search_with_machine_learning_course/blob/main/week1/hello_world_judgments.csv)
+| Query      | Precision@1 | Precision@5 | Precision@10 |
+| ---------- | ----------- | ----------- | ------------ |
+| lcd tv     |         0.0 |         0.0 |          0.2 |
+| ipad       |         0.0 |         0.6 |          0.4 |
+| Touchpad   |         0.0 |         0.2 |          0.2 |
+| Beats      |         1.0 |         1.0 |          1.0 |
+
+[LTR - tuned](https://github.com/jenskuersten/search_with_machine_learning_course/blob/main/week1/ltr_tuned_judgments.csv)
+| Query      | Precision@1 | Precision@5 | Precision@10 |
+| ---------- | ----------- | ----------- | ------------ |
+| lcd tv     |         0.0 |         0.2✅ |          0.3✅ |
+| ipad       |         1.0✅ |         0.4❌ |          0.3❌ |
+| Touchpad   |         1.0✅ |         0.2 |          0.2 |
+| Beats      |         1.0 |         1.0 |          1.0 |
