@@ -14,18 +14,6 @@
         }
       },
       {
-        "name": "manufacturer_match",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match": {
-            "manufacturer": "{{keywords}}"
-          }
-        }
-      },
-      {
         "name": "name_match",
         "params": [
           "keywords"
@@ -100,7 +88,7 @@
         }
       },
       {
-        "name": "shortDescription_phrase",
+        "name": "longDescription_phrase",
         "params": [
           "keywords"
         ],
@@ -177,17 +165,6 @@
         }
       },
       {
-        "name": "script_availability",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "script_score": {
-              "script": "if (doc['onlineAvailability'][0] == false){return 0.0} else {return 1.0}"
-            }
-          }
-        }
-      },
-      {
         "name": "script_isMusicOrMovie",
         "template_language": "mustache",
         "template": {
@@ -196,20 +173,6 @@
               "script": {
                 "lang" : "painless",
                 "source": "if (doc['departmentId'] == null || doc['departmentId'].size() == 0 ) {return 0.0;} else if (doc['departmentId'].value == 8) {return 1.0;}"
-              }
-            }
-          }
-        }
-      },
-      {
-        "name": "script_isBargain",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "script_score": {
-              "script": {
-                "lang" : "painless",
-                "source": "if (doc['regularPrice'] == null || doc['regularPrice'].size() == 0 || doc['salePrice'] == null || doc['salePrice'].size() == 0) {return 0.0;} else {return doc['regularPrice'].value - doc['salePrice'].value;}"
               }
             }
           }

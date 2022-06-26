@@ -24,7 +24,9 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     "model": ltr_model_name,
                     "store": ltr_store_name,
                     "active_features": 
-                        [   "name_match",
+                        [   
+                            "sku_match",
+                            "name_match",
                             "name_avg_raw_tp",
                             "name_phrase",
                             "name_hyphens",
@@ -32,7 +34,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                             "longDescription_phrase",
                             "customerReviewCount",
                             "salesRankLongTerm",
-                            "script_available"
+                            "script_isMusicOrMovie",
                         ]
                 }
             },
