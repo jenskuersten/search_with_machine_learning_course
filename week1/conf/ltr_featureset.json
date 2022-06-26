@@ -2,6 +2,30 @@
   "featureset": {
     "features": [
       {
+        "name": "sku_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "sku": "{{keywords}}"
+          }
+        }
+      },
+      {
+        "name": "manufacturer_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "manufacturer": "{{keywords}}"
+          }
+        }
+      },
+      {
         "name": "name_match",
         "params": [
           "keywords"
@@ -70,28 +94,13 @@
           "match_phrase": {
             "artistName": {
               "query": "{{keywords}}",
-              "slop": 6
+              "slop": 3
             }
           }
         }
       },
       {
         "name": "shortDescription_phrase",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match_phrase": {
-            "longDescription": {
-              "query": "{{keywords}}",
-              "slop": 6
-            }
-          }
-        }
-      },
-      {
-        "name": "longDescription_phrase",
         "params": [
           "keywords"
         ],
@@ -168,53 +177,40 @@
         }
       },
       {
-        "name": "script_recency",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [
-              {
-                "filter": {
-                  "exists": {
-                    "field": "releaseDate"
-                  }
-                },
-                "exp": {
-                  "releaseDate" : {
-                      "origin": "2013-01-01",
-                      "offset": "5d",
-                      "scale" : "60d"
-                  }
-                }
-              },
-              {
-                "filter": {
-                  "bool": {
-                    "must_not": {
-                      "exists": {
-                        "field": "releaseDate"
-                      }
-                    }
-                  }
-                },
-                "script_score": {
-                  "script": "if (doc['releaseDate'] == null || doc['releaseDate'].size() == 0  ){return 0.0}"
-                }
-              }
-            ],
-            "query": {
-              "match_all": {}
-            }
-          }
-        }
-      },
-      {
-        "name": "script_available",
+        "name": "script_availability",
         "template_language": "mustache",
         "template": {
           "function_score": {
             "script_score": {
               "script": "if (doc['onlineAvailability'][0] == false){return 0.0} else {return 1.0}"
+            }
+          }
+        }
+      },
+      {
+        "name": "script_isMusicOrMovie",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "script_score": {
+              "script": {
+                "lang" : "painless",
+                "source": "if (doc['departmentId'] == null || doc['departmentId'].size() == 0 ) {return 0.0;} else if (doc['departmentId'].value == 8) {return 1.0;}"
+              }
+            }
+          }
+        }
+      },
+      {
+        "name": "script_isBargain",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "script_score": {
+              "script": {
+                "lang" : "painless",
+                "source": "if (doc['regularPrice'] == null || doc['regularPrice'].size() == 0 || doc['salePrice'] == null || doc['salePrice'].size() == 0) {return 0.0;} else {return doc['regularPrice'].value - doc['salePrice'].value;}"
+              }
             }
           }
         }
