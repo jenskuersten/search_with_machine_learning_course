@@ -266,8 +266,9 @@ class DataPrepper:
         for hit in log_query_response['hits']['hits']:
             feature_results["doc_id"].append(hit['_id'])  # capture the doc id so we can join later
             feature_results["query_id"].append(query_id)
-            feature_results["sku"].append(hit['_id'])
+            feature_results["sku"].append(hit["_source"]["sku"][0])
             for log_entry in hit['fields']['_ltrlog'][0]['log_entry']:
+                #print(log_entry)
                 if log_entry['name'] in features and 'value' in log_entry:
                     feature_results[log_entry['name']].append(log_entry['value'])
                 else:
