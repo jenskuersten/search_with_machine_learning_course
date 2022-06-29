@@ -14,6 +14,18 @@
         }
       },
       {
+        "name": "manufacturer_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match": {
+            "manufacturer": "{{keywords}}"
+          }
+        }
+      },
+      {
         "name": "name_match",
         "params": [
           "keywords"

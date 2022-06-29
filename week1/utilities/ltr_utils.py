@@ -26,6 +26,7 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                     "active_features": 
                         [   
                             "sku_match",
+                            "manufacturer_match",
                             "name_match",
                             "name_avg_raw_tp",
                             "name_phrase",
