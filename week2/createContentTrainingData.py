@@ -6,25 +6,37 @@ from pathlib import Path
 from nltk.stem import SnowballStemmer
 import re
 import pandas as pd
+import csv
+import warnings
+# get rid of future warnings of pandas
+warnings.simplefilter(action='ignore', category=FutureWarning)
+
+def striphtml(data):
+    p = re.compile(r'<.*?>')
+    return p.sub('', data)
 
 def transform_name(product_name):
     input = product_name
     stemmer = SnowballStemmer("english")
 
-    # alphanumeric
-    alphanumeric_product_name = re.sub(r'[^A-Za-z0-9 ]+', '', product_name)
+    # strip html
+    product_name = striphtml(product_name)
 
-    # remove punctuation & brackets
-    tokenized_product_name = re.sub('[.\!?,\'/()]', '', alphanumeric_product_name)
+    # tokenize punctuation & brackets
+    product_name = re.sub('[\!?\'/()]', ' ', product_name)
+
+    # only keep alphanumeric and special semantic chars
+    product_name = re.sub('[^A-Za-z0-9$\-" ]+', '', product_name)
 
     # trim whitespaces
-    trimmed_product_name = re.sub('\s+', ' ', tokenized_product_name)
+    product_name = re.sub('\s+', ' ', product_name)
 
-    # loweracase
-    normalized_product_name = stemmer.stem(trimmed_product_name.lower())
+    # lowercase & stem
+    for term in product_name.split('\s'):
+        product_name_stem = stemmer.stem(term.lower())
     
-    #print("input: " + product_name + ", normalized: " + normalized_product_name)
-    return normalized_product_name
+    #print("input: %s, normalized: %s" % (input, product_name_stem))
+    return product_name_stem
 
 # Directory for product data
 directory = r'/workspace/datasets/product_data/products/'
@@ -49,6 +61,8 @@ path = Path(output_file)
 output_dir = path.parent
 output_dir_name = output_dir.as_posix() + os.path.sep
 output_file_name = re.sub(output_dir_name, '', output_file)
+pandas_src_file_name = "%spandas_%s" % (output_dir_name, output_file_name)
+print("pandas file_name: %s" % pandas_src_file_name)
 
 if os.path.isdir(output_dir) == False:
         os.mkdir(output_dir)
@@ -62,38 +76,44 @@ names_as_labels = False
 if args.label == 'name':
     names_as_labels = True
 
-df = pd.DataFrame(columns=['label', 'product_name'])
 
-# print("Writing results to %s" % output_file)
-# with open(output_file, 'w') as output:
-#     for filename in os.listdir(directory):
-#         if filename.endswith(".xml"):
-#             print("Processing %s" % filename)
-#             f = os.path.join(directory, filename)
-#             tree = ET.parse(f)
-#             root = tree.getroot()
-#             for child in root:
-#                 if random.random() > sample_rate:
-#                     continue
-#                 # Check to make sure category name is valid and not in music or movies
-#                 if (child.find('name') is not None and child.find('name').text is not None and
-#                     child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
-#                     child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None and
-#                     child.find('categoryPath')[0][0].text == 'cat00000' and
-#                     child.find('categoryPath')[1][0].text != 'abcat0600000'):
-#                       # Choose last element in categoryPath as the leaf categoryId or name
-#                       if names_as_labels:
-#                           cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
-#                       else:
-#                           cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-#                       # Replace newline chars with spaces so fastText doesn't complain
-#                       name = child.find('name').text.replace('\n', ' ')
-#                       output.write("__label__%s %s\n" % (cat, transform_name(name)))
-#                       df = df.append({'label': '__label__'+cat, 'product_name': transform_name(name)}, ignore_index=True)
+if (os.path.exists(Path(pandas_src_file_name))):
+    print("Loading existing data file %s" % pandas_src_file_name)
+    print("!!!Attention!!!: delete the file if source or transformation changed")
+    df = pd.read_csv(pandas_src_file_name, names=['label', 'product_name'], header=None)
+else:
+    df = pd.DataFrame(columns=['label', 'product_name'])
+    print("Writing results to %s" % pandas_src_file_name)
 
-# write re-readable pandas data frame
-#df.to_csv("%spandas_%s" % (output_dir_name, output_file_name), index=False, header=False)
-df = pd.read_csv("%spandas_%s" % (output_dir_name, output_file_name), names=['label', 'product_name'], header=None)
+    with open(output_file, 'w') as output:
+        for filename in os.listdir(directory):
+            if filename.endswith(".xml"):
+                print("Processing %s" % filename)
+                f = os.path.join(directory, filename)
+                tree = ET.parse(f)
+                root = tree.getroot()
+                for child in root:
+                    if random.random() > sample_rate:
+                        continue
+                    # Check to make sure category name is valid and not in music or movies
+                    if (child.find('name') is not None and child.find('name').text is not None and
+                        child.find('categoryPath') is not None and len(child.find('categoryPath')) > 0 and
+                        child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None and
+                        child.find('categoryPath')[0][0].text == 'cat00000' and
+                        child.find('categoryPath')[1][0].text != 'abcat0600000'):
+                        # Choose last element in categoryPath as the leaf categoryId or name
+                        if names_as_labels:
+                            cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
+                        else:
+                            cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                        # Replace newline chars with spaces so fastText doesn't complain
+                        name = child.find('name').text.replace('\n', ' ')
+                        #output.write("__label__%s %s\n" % (cat, transform_name(name)))
+                        df = df.append({'label': '__label__'+cat, 'product_name': transform_name(name)}, ignore_index=True)
+
+    # write re-readable pandas data frame
+    df.to_csv(pandas_src_file_name, sep='\t', index=False, header=False, quoting=csv.QUOTE_NONE)
+
 
 # get frequency of categories and apply filtering
 pruned_min = df[df['label'].map(df['label'].value_counts()) >= min_products]
@@ -104,4 +124,4 @@ print("row count: " + str(len(pruned_min)))
 
 pruned_output_file = "%spruned_%s" % (output_dir_name, output_file_name)
 print("Writing results to %s" % pruned_output_file)
-pruned_min.to_csv(pruned_output_file, sep=' ', index=False, header=False)
+pruned_min.to_csv(pruned_output_file, sep='\t', index=False, header=False, quoting=csv.QUOTE_NONE)
