@@ -15,9 +15,8 @@ def striphtml(data):
     p = re.compile(r'<.*?>')
     return p.sub('', data)
 
-def transform_name(product_name):
+def transform_name(stemmer, product_name):
     input = product_name
-    stemmer = SnowballStemmer("english")
 
     # strip html
     product_name = striphtml(product_name)
@@ -26,15 +25,18 @@ def transform_name(product_name):
     product_name = re.sub('[\!?\'/()]', ' ', product_name)
 
     # only keep alphanumeric and special semantic chars
-    product_name = re.sub('[^A-Za-z0-9$\-" ]+', '', product_name)
+    product_name = re.sub('[^A-Za-z0-9$\-"\. ]+', '', product_name)
+
+    product_name_stem = str()
+    for term in product_name.split():
+        # remove single-char tokens
+        if (len(term) > 1):
+            # lowercase & stem
+            product_name_stem += stemmer.stem(term.lower()) + " "
 
     # trim whitespaces
     product_name = re.sub('\s+', ' ', product_name)
 
-    # lowercase & stem
-    for term in product_name.split('\s'):
-        product_name_stem = stemmer.stem(term.lower())
-    
     #print("input: %s, normalized: %s" % (input, product_name_stem))
     return product_name_stem
 
@@ -63,6 +65,8 @@ output_dir_name = output_dir.as_posix() + os.path.sep
 output_file_name = re.sub(output_dir_name, '', output_file)
 pandas_src_file_name = "%spandas_%s" % (output_dir_name, output_file_name)
 print("pandas file_name: %s" % pandas_src_file_name)
+
+stemmer = SnowballStemmer("english")
 
 if os.path.isdir(output_dir) == False:
         os.mkdir(output_dir)
@@ -109,7 +113,7 @@ else:
                         # Replace newline chars with spaces so fastText doesn't complain
                         name = child.find('name').text.replace('\n', ' ')
                         #output.write("__label__%s %s\n" % (cat, transform_name(name)))
-                        df = df.append({'label': '__label__'+cat, 'product_name': transform_name(name)}, ignore_index=True)
+                        df = df.append({'label': '__label__'+cat, 'product_name': transform_name(stemmer, name)}, ignore_index=True)
 
     # write re-readable pandas data frame
     df.to_csv(pandas_src_file_name, sep='\t', index=False, header=False, quoting=csv.QUOTE_NONE)
