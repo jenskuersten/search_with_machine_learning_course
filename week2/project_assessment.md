@@ -5,7 +5,7 @@
 - What fastText parameters did you use?
   - `-lr 1 -epoch 25 -wordNgrams 2`
 - How did you transform the product names?
-  - mainly followed the suggestions in the description, by (a) non-alphanumeric chars and punctuations, (b) whitespace stripping, (c) a failed attempt at stemming - can you spot the [bug](https://github.com/gsingers/search_with_machine_learning_course/commit/6147f0dd2590b2d8cdefadafc4da71a76c43547c#diff-35e472638d071ac9aa810dcd8f7cbf7c07ce0b3f426aacd9317da90dc67cf6a5) :D?
+  - mainly followed the suggestions in the description, by (a) filtering non-alphanumeric chars and punctuations, (b) whitespace stripping, (c) a failed attempt at stemming - can you spot the [bug](https://github.com/gsingers/search_with_machine_learning_course/commit/6147f0dd2590b2d8cdefadafc4da71a76c43547c#diff-35e472638d071ac9aa810dcd8f7cbf7c07ce0b3f426aacd9317da90dc67cf6a5) :D?
 - How did you prune infrequent category labels, and how did that affect your precision?
   - again, mainly followed the project description and removed categories with less than 500 products
   - P@1=0.973, see [evaluation file](https://github.com/jenskuersten/search_with_machine_learning_course/blob/main/week2/eval/level1_product_classification_results.txt)
@@ -22,7 +22,7 @@
 - How did you transform the product names?
   - stripping html
   - basic tokenizing
-  - filtered to alphanumerics plus a few more possbily semantic chars (in the data)
+  - filtered to alphanumerics, but kept a few possbily semantic chars like `-`, `.`, `$`, because they are frequently used as units, see [here](https://github.com/jenskuersten/search_with_machine_learning_course/blob/0f39b6d23c42da0ad25e3420f14b5a0f2c39fbbd/week2/createContentTrainingData.py#L28)
   - stemming (fixed bug from level 1)
   - filter: term length > 1
   - strip whitespaces
@@ -36,7 +36,9 @@
   - reduced the threshold, because on some examples best synonyms like `notebook` for `laptop` had a lower value than 0.75. Also reduced the number of synonyms to return per term, because for some other examples there were a lot of near-duplicates like model numbers or specific size descirptions for `plasma`
   -  test: `--threshold 0.66 --k 5`
 - Were you able to find the additional results by matching synonyms?
-  - TODO
+  - earbuds: worked as expected, got 2511 hits
+  - nespresso: nah - didn't change anything - my synonyms.csv does not contain nespresso as source for expansion
+  - dslr: worked, but to a horribly amount with 10k hits. It turned out that including semantic punctuations like `-` was not the best idea, because the synonyms for `dslr` from my model were: `slr, len, slr, 18-200mm, 18-55mm, 18-135mm, a55, flash, a330`
 
 ## For classifying reviews:
 - did not get that far due to personal time limitations
