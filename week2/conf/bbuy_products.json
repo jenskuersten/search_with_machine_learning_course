@@ -39,7 +39,7 @@
         },
         "synonym": {
           "type": "synonym",
-          "synonyms_path": "../../../workspace/datasets/fasttext/synonyms.csv"
+          "synonyms_path": "synonyms.csv"
         }
       }
     }
