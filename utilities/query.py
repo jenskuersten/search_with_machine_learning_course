@@ -49,7 +49,7 @@ def create_prior_queries(doc_ids, doc_id_weights,
 
 
 # Hardcoded query here.  Better to use search templates or other query config.
-def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=10, source=None):
+def create_query(user_query, click_prior_query, filters, sort="_score", sortDir="desc", size=1, source=None, synonym_f='no.synonyms'):
     query_obj = {
         'size': size,
         "sort": [
@@ -91,7 +91,7 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
                                     "minimum_should_match": "2<75%",
                                     "fields": ["name^10", "name.hyphens^10", "shortDescription^5",
                                                "longDescription^5", "department^0.5", "sku", "manufacturer", "features",
-                                               "categoryPath", "name_synonyms"]
+                                               "categoryPath", synonym_f]
                                 }
                             },
                             {
@@ -186,8 +186,13 @@ def create_query(user_query, click_prior_query, filters, sort="_score", sortDir=
     return query_obj
 
 
-def search(client, user_query, index="bbuy_products", sort=None, sortDir="desc"):
-    query_obj = create_query(user_query, click_prior_query=None, filters=None, sort=sort, sortDir=sortDir, source=["name", "shortDescription"])
+def search(client, user_query, index="bbuy_products", use_synonyms=False):
+    if use_synonyms:
+        synonym_field = 'name.synonyms'
+    else:
+        synonym_field = 'no.synonyms'
+
+    query_obj = create_query(user_query, click_prior_query=None, filters=None, source=["name", "shortDescription"], synonym_f=synonym_field)
     logging.info(query_obj)
     response = client.search(query_obj, index=index)
     if response and response['hits']['hits'] and len(response['hits']['hits']) > 0:
@@ -243,7 +248,7 @@ if __name__ == "__main__":
         if query == "Exit":
             break
         #### W3: classify the query
-        search(client=opensearch, user_query=query, index=index_name)
+        search(client=opensearch, user_query=query, index=index_name, use_synonyms=True)
 
         print(query_prompt)
 
