@@ -15,3 +15,9 @@ cat /workspace/datasets/fasttext/titles.txt | sed -e "s/\([.\!?,'/()]\)/ \1 /g" 
 # level 3 - integration
 cat /workspace/datasets/fasttext/titles_normalized.txt | tr " " "\n" | grep "...." | sort | uniq -c | sort -nr | head -1000 | grep -oE '[^ ]+$' > /workspace/datasets/fasttext/top_words.txt
 python ../../search_with_machine_learning_course/week2/generateSynonyms.py --model /workspace/datasets/fasttext/title_normalized_model.bin --threshold 0.66 --max 5 --input top_words.txt
+
+# copy synonyms to be available in the docker container
+docker cp synonyms.csv opensearch-node1:/usr/share/opensearch/config/synonyms.csv
+
+./delete-indexes.sh
+./index-data.sh -p /workspace/search_with_machine_learning_course/week2/conf/bbuy_products.json -r
